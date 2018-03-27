@@ -3,6 +3,7 @@ import logging
 import re
 import hashlib
 import pprint
+import urllib
 from webapp2_extras import json
 from google.appengine.api import urlfetch
 from secret import token
@@ -41,7 +42,7 @@ def parse_cards(text):
 
 def get_card_data(name, set_id):
     shortname_re = re.compile("^{}(([,])|( of )|( the )).*".format(name.lower()))
-    url = "https://api.magicthegathering.io/v1/cards?orderBy=releaseDate&name={}".format(name)
+    url = "https://api.magicthegathering.io/v1/cards?orderBy=releaseDate&name={}".format(urllib.quote(name))
 
     if set_id is not None:
         url = url+"&set={}".format(set_id)
@@ -68,7 +69,7 @@ def get_card_data(name, set_id):
     elif len(others_with_images) > 0:
         return others_with_images[0]
     else:
-        return {"imageUrl": "http://gatherer.wizards.com/Handlers/Image.ashx?name={}&type=card&.png".format(name)}
+        return {"imageUrl": "http://gatherer.wizards.com/Handlers/Image.ashx?name={}&type=card&.png".format(urllib.quote(name))}
 
 
 def get_card_image(image_url):
@@ -80,7 +81,6 @@ def upload_image(card_image):
     url = "https://image.groupme.com/pictures"
     headers = {"X-Access-Token": token, "Content-Type": 'image/png', 'Content-Length': image_len}
     upload_response = urlfetch.fetch(url, payload=str(card_image), method=urlfetch.POST, headers=headers)
-    logging.info(json.decode(upload_response.content))
     return json.decode(upload_response.content)['payload']["url"]
 
 
@@ -91,7 +91,6 @@ def send_message(text, bot_id, image_url=None):
         obj['attachments'] = [{"type": "image", "url": image_url}]
     payload = json.encode(obj)
     result = urlfetch.fetch(groupme_api, payload=payload, method=urlfetch.POST, headers=headers)
-    logging.info(str(result.content))
 
 
 app = webapp2.WSGIApplication([
