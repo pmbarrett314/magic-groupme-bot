@@ -1,16 +1,19 @@
-import webapp2
+
+import hashlib
 import logging
 import os
 import re
-import hashlib
 import pprint
-import urllib
 import time
+import urllib
+import webapp2
 
 import cloudstorage as gcs
 from webapp2_extras import json
 from google.appengine.api import urlfetch
 from secret import token
+
+from google.appengine.api import app_identity
 
 
 card_re = re.compile("\[\[([^\[\]]+)\]\]")
@@ -61,6 +64,7 @@ class MagicGroupmeBot(webapp2.RequestHandler):
                 self.send_message(card_name, groupme_image_url)
 
     def send_message(self, text, image_url=None):
+
         headers = {'Content-Type': 'application/json'}
         obj = {"text": text, "bot_id": self.bot_id}
         if image_url is not None:

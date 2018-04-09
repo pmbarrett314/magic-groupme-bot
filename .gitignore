@@ -1,3 +1,5 @@
 secret.py
 *.pyc
 .python-version
+deploy-production 
+deploy-staging
